@@ -1,0 +1,54 @@
+estados da UI
+
+Passo 0
+Big ACE
+Cardies visible
+
+Passo 1 - início
+Inicia Jogo
+Mão Vazia
+pHand = 2 cartas vazias
+dHand = 1 vazia, 1 oculta
+Seleciona 2 cartas do jogador e 1 do dealer
+Se selecionou todas as cartas:
+	Cartas saem e botão confirmar
+		Confirma e Passo 2
+			OU
+		Retrai carta(s) e segue no Passo 1
+
+Passo 2
+Cartas lockadas com sucesso
+Simulação e atualiza tabela
+Verdadeiro Passo 3
+Escolhe Hit ou Stand
+Se Hit
+	Avança Passo 3
+Se Stand
+	Avança Passo 4
+
+Passo 3
+Escolhe carta Player
+Sistema atualiza status carta se necessário (pode usar used Cards na lógica extra)
+Verdadeiro Passo 5
+Cartas saem e botão confirmar
+	Retrai carta e segue em Passo 3
+		OU
+	Confirma
+		Se Valor < 21
+			Retorna Passo 2
+		Senão
+			Avança Passo 4
+
+Passo  4
+Carta oculta vira carta seleção
+Escolhe cartas dealer
+Enquanto Valor < 17
+	Abre espaço para novas cartas	Vai requerer lógica robusta caso queira tirar cartas
+Valor >= 17
+Cartas saem e botão Confirmar
+	Confirma
+		Atualiza Histórico (não é feature obrigatória para teste)
+		Reseta Passo 0
+	Retrai cartas
+		Segue Passo 4
+

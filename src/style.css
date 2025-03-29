@@ -1,0 +1,195 @@
+header {
+    height: 125px;
+    background-color: rgb(55, 134, 199);
+    vertical-align: middle;
+    text-align: center;
+    padding-top: 13px;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.headerImage {
+    vertical-align: middle;
+}
+
+#imgLeft {
+    padding-top: 5px;
+    height: 100px;
+    width: 30%;
+    float: left;
+    text-align: right;
+}
+
+#ncpImg {
+    height: 90px;
+}
+
+#imgMid {
+    height: 100px;
+    width: 30%;
+    float: left;
+    text-align: center;
+}
+
+#saeImg {
+    height: 100px;
+}
+
+#imgRight {
+    padding-top: 15px;
+    height: 100px;
+    width: 30%;
+    float: left;
+    text-align: left;
+}
+
+#skribblImg {
+    height: 70px;
+}
+
+nav {
+    height: 5vh;
+}
+
+.nav-item {
+    height: 100%;
+}
+
+.container-fluid ul li a:hover{ /* css para alterar a nav quando o mouse passar por cada bloco */
+	background-color:#D6D6D6;
+	color:#6D6D6D;
+	border-bottom: 3px solid rgb(55, 112, 199);
+	font-size:20px;
+}
+
+section {
+    min-height: 75vh;
+    width: 100%;
+}
+
+.left {
+	float: left;
+	width: 15%;
+	min-height: 75vh;
+
+}
+
+.center {
+    float: left;
+    width: 55%;
+    min-height: 75vh;
+    background-color: #70cbc1;
+}
+
+#gameTableBorder {
+    width: 100%;
+    background-color: #572729;
+    padding: 30px;
+}
+
+#gameTableCenter {
+    width: 100%;
+    height: 100%;
+    background-color: #70cbc1;
+}
+
+#bigAce {
+    height: 100%;
+    text-align: center;
+    padding-top: 15%;
+    padding-bottom: 15%;
+}
+
+#bigAceImg {
+    height: 100%;
+    vertical-align: middle;
+}
+
+.handValue {
+    width: 100%;
+    float: left;
+    color: black;
+    font-size: 15px;
+}
+
+#cardSelector {
+    width: 100%;
+    height: 100%;
+}
+
+.cardContainer {
+    float: left;
+}
+
+.cardContainer {
+    background-color: black;
+}
+
+.cardContainer.inSelector:hover {
+    background-color: gold;
+}
+
+.cardContainer.draft {
+    background-color: black;
+    animation: smooth-transition 0.5s infinite alternate;
+}
+
+@keyframes smooth-transition {
+    from {
+        background-color: black;
+    }
+    to {
+        background-color: gray;
+    }
+}
+
+.btn {
+    min-height: 48px;
+    min-width: 144px;
+}
+
+.right {
+    float: left;
+    width: 30%;
+    min-height: 75vh;
+}
+
+#tablesContainer {
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.simulationsTableColumnHeader {
+    text-align: center;
+}
+
+.simulationsTableItem {
+    text-align: center;
+}
+
+.remainingTableColumnHeader {
+    text-align: center;
+}
+
+.remainingTableFRow {
+    text-align: center;
+    font-weight: bold;
+}
+
+.remainingTableCRow {
+    text-align: center;
+}
+
+footer {
+	height: 10vh;
+	width: 100%;
+	background-color:#ededed;
+    vertical-align: middle;
+}
+
+.footerText {
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+	text-align: center;
+    vertical-align: middle;
+}

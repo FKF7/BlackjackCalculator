@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+	<head>
+		<title>Blackjack Machine</title>
+		<link rel="icon" href="../img/ace.png" alt="Blue Puffle" type="image/x-icon"/>
+		<meta charset="utf-8"/>
+		<meta name="author" content="FKF7"/>
+		<meta name="description" content="SAE Blackjack winner"/>
+		<meta name="keywords" content="NewCP, NCP, SAE, Skribbl.io"/>
+		<link rel="stylesheet" type="text/css" href="style.css"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<script type="text/javascript" src="main.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		
+	</head>
+	
+	<body onload="onInit()">
+		<header>
+			<div id="imgLeft"><img class="headerImage" id="ncpImg" src="../img/newCP.jpeg" alt="Blue Puffle"/></div>
+			<div id="imgMid"><img class="headerImage" id="saeImg" src="../img/SAE.png" alt="Blue Puffle"/></div>
+			<div id="imgRight"><img class="headerImage" id="skribblImg" src="../img/ace.png" alt="Blue Puffle"/></div>
+		</header>
+		
+		<nav class="navbar navbar-default">
+			<div class="container-fluid">
+				<ul class="nav navbar-nav justify-content-center">
+					<li class="nav-item active enabled"><a href="index.html">Blackjack Machine</a></li>
+					<li class="nav-item disabled"><a href="index.html">Coming soon?</a></li>
+				</ul>
+			</div>
+		</nav>
+		
+		<section>
+			<div class="left">
+				<div class="tablesContainer">
+					<div id="remainingTableContainer">
+						<table class="table table-striped" id="remainingTable">
+							<thead>
+								<tr>
+									<th class="remainingTableColumnHeader">Card</th>
+									<th class="remainingTableColumnHeader">Left</th>
+								</tr>
+							</thead>
+							<tbody id="remainingTableBody">
+								<tr><td></td><td></td><td></td><td></td></tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="center">
+				<div id="gameTableBorder">
+					<div id="gameTableCenter">
+						<div id="bigAce">
+							<img id="bigAceImg" src="../img/ace.png" alt="Big Ace"/>
+						</div>
+						<div id="gameCards">
+							<div id="playerHand" class="hand"></div>
+							<div id="playerHandValue" class="handValue"></div>
+							<div id="dealerHand" class="hand"></div>
+							<div id="dealerHandValue" class="handValue"></div>
+						</div>
+					</div>
+				</div>
+				<div id="cardSelector">
+				</div>
+				<!-- Here will be the central game part -->
+			</div>
+			<div class="right">
+				<div class="tablesContainer">
+					<div id="simulationsTableContainer">
+						<table class="table table-striped" id="simulationsTable">
+							<thead>
+								<tr>
+									<th class="simulationsTableColumnHeader">Hits</th>
+									<th class="simulationsTableColumnHeader">0</th>
+									<th class="simulationsTableColumnHeader">1</th>
+									<th class="simulationsTableColumnHeader">2</th>
+									<th class="simulationsTableColumnHeader">3</th>
+								</tr>
+							</thead>
+							<tbody id="simulationsTableBody">
+								<tr><td></td><td></td><td></td></tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</section>
+		<footer class="footer">
+				<p class="footerText">
+					Created by FKF7
+					<br/>
+					Do not distribute without authorization
+				</p>
+		</footer>
+	</body>
+</html>
