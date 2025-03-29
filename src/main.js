@@ -886,6 +886,12 @@ function onKeyPress(key) {
                     if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
                         onSelectCard(10);
                     }
+                    break;
+                case 'a': case 'A':
+                    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+                        onSelectCard(1);
+                    }
+                    break;
             }
             drawGameTable();
             this.isKeyPressed = false;
