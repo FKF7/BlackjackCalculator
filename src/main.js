@@ -490,6 +490,9 @@ function drawStatsTables() {
                             <td class="remainingTableFRow">${i}</td><td class="remainingTableCRow">${remaining}</td><td class="remainingTableCRow">${totalRemaining}</td>
                         </tr>`
     }
+    tableContent += `<tr>
+                        <td class="remainingTableFRow">T</td><td class="remainingTableCRow">${this.deck.getTCards()}</td><td class="remainingTableCRow">-</td>
+                    </tr>`
     ramainingTable.innerHTML = tableContent;
 }
 
@@ -879,6 +882,10 @@ function onKeyPress(key) {
                         onNewGameButtonClick();
                     }
                     break;
+                case 'j': case 'J': case 'q': case 'Q': case 'k': case 'K':
+                    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+                        onSelectCard(10);
+                    }
             }
             drawGameTable();
             this.isKeyPressed = false;
