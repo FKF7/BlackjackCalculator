@@ -96,7 +96,7 @@ class UsedCards {
     getUsed(card) {
         return this.cards[card] ? this.cards[card] : 0;
     }
-    getTotalUsed() {
+    getTUsed() {
         return this.totalUsed;
     }
 }
@@ -384,11 +384,11 @@ function adjustNotDrawnPossibilities(decks, usedCards, nCardsDrawnPlayer, nCards
     let mult = 1;
     // nCardsDrawnDealer -= this.dealerHiddenCard === 0 ? 0 : 1;
     const startingI = hiddenCards + nCardsDrawnPlayer + nCardsDrawnDealer;
-    let multiplier = decks[startingI - 1].getTCards() - usedCards[startingI - 1].getTotalUsed() + 1; // + 1 for if the first deck is the same as the previous
+    let multiplier = decks[startingI - 1].getTCards() - usedCards[startingI - 1].getTUsed() + 1; // + 1 for if the first deck is the same as the previous
     
     for (let i = startingI; i < startingI + (maxDrawsByDealer - nCardsDrawnDealer); i++) {
         if (decks[i] !== decks[i - 1]) {
-            multiplier = decks[i].getTCards() - usedCards[i].getTotalUsed() + 1;
+            multiplier = decks[i].getTCards() - usedCards[i].getTUsed() + 1;
         } else {
             multiplier--;
         }
@@ -484,8 +484,10 @@ function drawStatsTables() {
     tableContent = '';
 
     for (let i = Cards.ACE; i <= Cards.TEN; i++) {
+        let remaining = getRemainingFromCard(i);
+        let totalRemaining = formatPercentage(remaining / (this.deck.getTCards() - this.usedCards.getTUsed()));
         tableContent += `<tr>
-                            <td class="remainingTableFRow">${i}</td><td class="remainingTableCRow">${getRemainingFromCard(i)}</td>
+                            <td class="remainingTableFRow">${i}</td><td class="remainingTableCRow">${remaining}</td><td class="remainingTableCRow">${totalRemaining}</td>
                         </tr>`
     }
     ramainingTable.innerHTML = tableContent;
@@ -845,10 +847,10 @@ function onKeyPress(key) {
                             let dCards = this.dDraftHand.getCards();
                             let pCards = this.pDraftHand.getCards();    
                             if (this.dealerHand.getCards().length < dCards.length) {
-                                dCards.pop();
+                                this.usedCards.unuseCard(dCards.pop());
                                 this.dDraftHand = new Hand(dCards);
                             } else if (this.playerHand.getCards().length < this.pDraftHand.getCards().length) {
-                                pCards.pop();
+                                this.usedCards.unuseCard(pCards.pop());
                                 this.pDraftHand = new Hand(pCards);
                             }
                         
