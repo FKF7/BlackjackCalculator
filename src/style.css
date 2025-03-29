@@ -163,6 +163,11 @@ section {
     text-align: center;
 }
 
+.simulationsTableFRow {
+    text-align: center;
+    font-weight: bold;
+}
+
 .simulationsTableItem {
     text-align: center;
 }

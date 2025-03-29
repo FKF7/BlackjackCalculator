@@ -471,7 +471,7 @@ function drawStatsTables() {
     let tableContent = "";
 
     for (let i = 0; i < rows.length; i++) {
-        tableContent += `<tr><td class="simulationsTableItem">${rows[i]}</td>`;
+        tableContent += `<tr><td class="simulationsTableFRow">${rows[i]}</td>`;
         for (let j = 0; j <= maxDrawsByPlayer; j++) {
             tableContent += `<td class="simulationsTableItem">${probabilities[j][i]}</td>`
         }
