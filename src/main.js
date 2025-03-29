@@ -451,29 +451,34 @@ function formatPercentage(probability) {
 }
 
 function drawStatsTables() {
-    let a = new Array(4);
+    let probabilities = new Array(4);
     const simulationsTable = document.getElementById('simulationsTableBody');
     const ramainingTable = document.getElementById('remainingTableBody');
     for (let i = 0; i <= maxDrawsByPlayer; i++) {
-        a[i] = new Array(6);
-        a[i][0] = formatPercentage(this.probabilities[i].getDealerBusts());
-        a[i][1] = formatPercentage(this.probabilities[i].getWins());
-        a[i][2] = formatPercentage(this.probabilities[i].getTies());
-        a[i][3] = formatPercentage(this.probabilities[i].getUnsolveds());
-        a[i][4] = formatPercentage(this.probabilities[i].getLosts());
-        a[i][5] = formatPercentage(this.probabilities[i].getBusts());
+        probabilities[i] = new Array(9);
+        probabilities[i][0] = formatPercentage(this.probabilities[i].getDealerBusts());
+        probabilities[i][1] = formatPercentage(this.probabilities[i].getWins());
+        probabilities[i][2] = formatPercentage(this.probabilities[i].getTies());
+        probabilities[i][3] = formatPercentage(this.probabilities[i].getUnsolveds());
+        probabilities[i][4] = formatPercentage(this.probabilities[i].getLosts());
+        probabilities[i][5] = formatPercentage(this.probabilities[i].getBusts());
+        probabilities[i][6] = '';
+        probabilities[i][7] = formatPercentage(this.probabilities[i].getDealerBusts() + this.probabilities[i].getWins());
+        probabilities[i][8] = formatPercentage(this.probabilities[i].getBusts() + this.probabilities[i].getLosts());
     }
 
-    const rows = ['Dealer Bust', 'Win', 'Tie', 'Unsolved', 'Lost', 'Bust'];
+    const rows = ['Dealer Bust', 'Win', 'Tie', 'Unsolved', 'Lost', 'Bust', '', 'T Wins', 'T Losses'];
     let tableContent = "";
 
     for (let i = 0; i < rows.length; i++) {
         tableContent += `<tr><td class="simulationsTableItem">${rows[i]}</td>`;
         for (let j = 0; j <= maxDrawsByPlayer; j++) {
-            tableContent += `<td class="simulationsTableItem">${a[j][i]}</td>`
+            tableContent += `<td class="simulationsTableItem">${probabilities[j][i]}</td>`
         }
         tableContent += '</tr>';
     }
+
+
 
     simulationsTable.innerHTML = tableContent;
     tableContent = '';
@@ -810,6 +815,9 @@ function onKeyPress(key) {
 
         if (/^\d$/.test(key)) {
             if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+                if (key === '0') {
+                    key = '10';
+                }
                 onSelectCard(Number(key));
             }
             this.isKeyPressed = false;
@@ -847,7 +855,7 @@ function onKeyPress(key) {
                         break;
                     }
                     break;
-                case 'c': case 'C': case 'Enter':
+                case 'c': case 'C':
                     if (this.state === States.CONFIRMATION) {
                         onConfirmButtonClick();
                     }
@@ -860,6 +868,13 @@ function onKeyPress(key) {
                 case 's': case 'S':
                     if (this.state === States.DECISION) {
                         onStandButtonClick();
+                    }
+                    break;
+                case 'Enter':
+                    if (this.state === States.CONFIRMATION) {
+                        onConfirmButtonClick();
+                    } else if (this.state === States.GAME_START) {
+                        onNewGameButtonClick();
                     }
                     break;
             }
