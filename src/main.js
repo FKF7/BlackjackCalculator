@@ -467,7 +467,7 @@ function drawStatsTables() {
         probabilities[i][8] = formatPercentage(this.probabilities[i].getBusts() + this.probabilities[i].getLosts());
     }
 
-    const rows = ['Dealer Bust', 'Win', 'Tie', 'Unsolved', 'Lost', 'Bust', '', 'T Wins', 'T Losses'];
+    const rows = ['Dealer Bust', 'Win', 'Tie', 'Unsolved', 'Lost', 'Bust', '', 'T Win', 'T Lost'];
     let tableContent = "";
 
     for (let i = 0; i < rows.length; i++) {
