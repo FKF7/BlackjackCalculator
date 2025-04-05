@@ -12,8 +12,6 @@
 		
 		<script type="text/javascript" src="main.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 		
 	</head>
 	
@@ -80,13 +78,23 @@
 									<th class="simulationsTableColumnHeader">0</th>
 									<th class="simulationsTableColumnHeader">1</th>
 									<th class="simulationsTableColumnHeader">2</th>
-									<th class="simulationsTableColumnHeader">3</th>
+									<!-- <th class="simulationsTableColumnHeader">3</th> -->
 								</tr>
 							</thead>
 							<tbody id="simulationsTableBody">
 								<tr><td></td><td></td><td></td></tr>
 							</tbody>
 						</table>
+					</div>
+				</div>
+				<div id="copyButtonsContainer">
+					<div class="copyButtonContainer">
+						<input class="copyButton" type="image" class="copyButton" src="../img/copyButton.png" onclick="onCopyButtonClick('/blackjack bet:all ')"/>
+						<label>/blackjack bet:all </label>
+					</div>
+					<div class="copyButtonContainer">
+						<input class="copyButton" type="image" class="copyButton" src="../img/copyButton.png" onclick="onCopyButtonClick('/deposit ')"/>
+						<label>/deposit </label>
 					</div>
 				</div>
 			</div>

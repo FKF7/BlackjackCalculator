@@ -185,6 +185,21 @@ section {
     text-align: center;
 }
 
+#copyButtonsContainer {
+    margin-left: 20%;
+    margin-top: 20px;
+}
+
+.copyButtonContainer {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.copyButton {
+    width: 50px;
+    vertical-align: middle;
+}
+
 footer {
 	height: 10vh;
 	width: 100%;
@@ -198,3 +213,5 @@ footer {
 	text-align: center;
     vertical-align: middle;
 }
+
+.btn-secondary{color:#fff;background-color:#6c757d;border-color:#6c757d}.btn-secondary:hover{color:#fff;background-color:#5a6268;border-color:#545b62}.btn-secondary.disabled,.btn-secondary:disabled{color:#fff;background-color:#6c757d;border-color:#6c757d}

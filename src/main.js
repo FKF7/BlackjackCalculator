@@ -4,23 +4,28 @@ const totalCards = deckNumber * cardsInDeck;
 const baseRoundPlayerCards = 2;
 const baseRoundDealerCards = 1;
 const baseRoundCards = baseRoundPlayerCards + baseRoundDealerCards;
+const maxPlayerDoubleDownCards = 3;
 const hiddenCards = 1;
 const maxDrawsByPlayer = 3;
 const maxDrawsByDealer = 3;
 const maxDraws = hiddenCards + maxDrawsByPlayer + maxDrawsByDealer;
 const dealerMinValue = 17;
-const blackJack = 21;
+const blackjack = 21;
 
 const btnHeight = 48;
 const btnWidth = 144;
 
 const States = Object.freeze({
     GAME_START: 0,
-    INITIAL_SELECT: 1,
-    DECISION: 2,
-    PLAYER_SELECT: 3,
-    CONFIRMATION: 4,
-    DEALER_SELECT: 5
+    MODIFY_DECK: 1,
+    FILL_GAME_PLAYER: 2,
+    FILL_GAME_DEALER: 3,
+    INITIAL_SELECT: 4,
+    DOUBLE_SELECT: 5,
+    DECISION: 6,
+    PLAYER_SELECT: 7,
+    CONFIRMATION: 8,
+    DEALER_SELECT: 9
 });
 const Cards = Object.freeze({
     ACE: 1,
@@ -127,6 +132,9 @@ class Hand {
     getValue() {
         return this.actualValue;
     }
+    getLength() {
+        return this.cards.length;
+    }
 }
 class PossibleResult {
     constructor() {
@@ -169,6 +177,7 @@ function onInit() {
     this.playerHand = new Hand([]);
     this.dealerHand = new Hand([]);
     this.usedCards = new UsedCards();
+    // forTesting();
     window.addEventListener('resize', () => {drawGameTable()});
     drawGameTable();
     document.addEventListener('keydown', function(event) {
@@ -280,14 +289,14 @@ function drawCards() {
                         pHand[0].addCard(i[1]);
                         usedCards[1].useCard(i[1]);
                         drawDealerCards(decks, usedCards, dHand, pHand[0], 2);
-                        if (pHand[0].getValue() < blackJack) {
+                        if (pHand[0].getValue() < blackjack) {
                             while (i[2] <= Cards.TEN) { // playerDraw2
                                 if (decks[2].getCard(i[2]) - usedCards[2].getUsed(i[2])) {
                                     pHand[1] = new Hand(pHand[0].getCards());
                                     pHand[1].addCard(i[2]);
                                     usedCards[2].useCard(i[2])
                                     drawDealerCards(decks, usedCards, dHand, pHand[1], 3);
-                                    if (pHand[1].getValue() < blackJack) {
+                                    if (pHand[1].getValue() < blackjack) {
                                         while (i[3] <= Cards.TEN) { // playerDraw3
                                             if (decks[3].getCard(i[3]) - usedCards[3].getUsed(i[3])) {
                                                 pHand[2] = new Hand(pHand[1].getCards());
@@ -324,7 +333,7 @@ function drawDealerCards(decks, usedCards, dealerHand, playerHand, d) { // d = d
     let i = [1, 1, 1];
     let dHand = new Array(maxDrawsByDealer);
 
-    if (playerHand.getValue() > blackJack) {
+    if (playerHand.getValue() > blackjack) {
         registerPossibilities(dealerHand, playerHand, decks, usedCards, d - 1);
     } else {
         if (dealerHand.getValue() < dealerMinValue) {
@@ -382,7 +391,6 @@ function calculatePossibilities(nDeck, nUsed) {
 
 function adjustNotDrawnPossibilities(decks, usedCards, nCardsDrawnPlayer, nCardsDrawnDealer) {
     let mult = 1;
-    // nCardsDrawnDealer -= this.dealerHiddenCard === 0 ? 0 : 1;
     const startingI = hiddenCards + nCardsDrawnPlayer + nCardsDrawnDealer;
     let multiplier = decks[startingI - 1].getTCards() - usedCards[startingI - 1].getTUsed() + 1; // + 1 for if the first deck is the same as the previous
     
@@ -400,7 +408,7 @@ function adjustNotDrawnPossibilities(decks, usedCards, nCardsDrawnPlayer, nCards
 function registerPossibilities(dHand, pHand, decks, usedCards, playerDraws) {
     let cards = [Object.keys(usedCards[0].cards), Object.keys(usedCards[maxDraws - 1].cards)];
     let poss = 1;
-    let dealerDraws = dHand.getCards().length - 2;
+    let dealerDraws = dHand.getLength() - 2;
     
     cards[0].forEach((card) => {
         poss *= calculatePossibilities(decks[0].getCard(card), usedCards[0].getUsed(card));
@@ -414,9 +422,9 @@ function registerPossibilities(dHand, pHand, decks, usedCards, playerDraws) {
     poss *= adjustNotDrawnPossibilities(decks, usedCards, playerDraws, dealerDraws);
 
 
-    if (pHand.getValue() > blackJack) {
+    if (pHand.getValue() > blackjack) {
         this.possibilities[playerDraws].bust(poss);
-    } else if (dHand.getValue() > blackJack) {
+    } else if (dHand.getValue() > blackjack) {
         this.possibilities[playerDraws].dealerBust(poss);
         
     } else if (dHand.getValue() < dealerMinValue) {
@@ -454,7 +462,7 @@ function drawStatsTables() {
     let probabilities = new Array(4);
     const simulationsTable = document.getElementById('simulationsTableBody');
     const ramainingTable = document.getElementById('remainingTableBody');
-    for (let i = 0; i <= maxDrawsByPlayer; i++) {
+    for (let i = 0; i <= 2; i++) {
         probabilities[i] = new Array(9);
         probabilities[i][0] = formatPercentage(this.probabilities[i].getDealerBusts());
         probabilities[i][1] = formatPercentage(this.probabilities[i].getWins());
@@ -472,7 +480,7 @@ function drawStatsTables() {
 
     for (let i = 0; i < rows.length; i++) {
         tableContent += `<tr><td class="simulationsTableFRow">${rows[i]}</td>`;
-        for (let j = 0; j <= maxDrawsByPlayer; j++) {
+        for (let j = 0; j <= 2; j++) {
             tableContent += `<td class="simulationsTableItem">${probabilities[j][i]}</td>`
         }
         tableContent += '</tr>';
@@ -491,13 +499,22 @@ function drawStatsTables() {
                         </tr>`
     }
     tableContent += `<tr>
-                        <td class="remainingTableFRow">T</td><td class="remainingTableCRow">${this.deck.getTCards()}</td><td class="remainingTableCRow">-</td>
+                        <td class="remainingTableFRow">T</td><td class="remainingTableCRow">${this.deck.getTCards() - this.usedCards.getTUsed()}</td><td class="remainingTableCRow">-</td>
                     </tr>`
     ramainingTable.innerHTML = tableContent;
 }
 
 function drawCard(card) {
     this.deck.drawCard(card);
+}
+
+function onFillGameButtonClick() {
+    advanceState(States.FILL_GAME_PLAYER);
+    this.playerHand = new Hand([]);
+    this.dealerHand = new Hand([]);
+    this.pDraftHand = new Hand([]);
+    this.dDraftHand = new Hand([]);
+    drawGameTable();
 }
 
 function onNewGameButtonClick() {
@@ -511,16 +528,30 @@ function onNewGameButtonClick() {
     drawGameTable();
 }
 
+function onModifyDeckButtonClick() {}
+
 function onSelectCard(card) {
     this.usedCards.useCard(card);
     switch (this.state) {
+        case States.FILL_GAME_PLAYER:
+            this.pDraftHand.addCard(card);
+            if (this.pDraftHand.getValue() >= blackjack) {
+                advanceState(States.CONFIRMATION);
+            }
+            break;
+        case States.FILL_GAME_DEALER:
+            this.dDraftHand.addCard(card);
+            if ((this.pDraftHand.getValue() >= blackjack && this.dDraftHand.getLength() === (baseRoundDealerCards + hiddenCards)) || this.dDraftHand.getValue() >= dealerMinValue) {
+                advanceState(States.CONFIRMATION);
+            }
+            break;
         case States.INITIAL_SELECT:
-            if (this.pDraftHand.getCards().length < baseRoundPlayerCards) {
+            if (this.pDraftHand.getLength() < baseRoundPlayerCards) {
                 this.pDraftHand.addCard(card);
             } else {
                 this.dDraftHand.addCard(card);
             }
-            if (this.pDraftHand.getCards().length + this.dDraftHand.getCards().length >= baseRoundCards) {
+            if (this.pDraftHand.getLength() + this.dDraftHand.getLength() >= baseRoundCards) {
                 advanceState(States.CONFIRMATION);
             }
             break;
@@ -528,11 +559,33 @@ function onSelectCard(card) {
             this.pDraftHand.addCard(card);
             advanceState(States.CONFIRMATION);
             break;
+        case States.DOUBLE_SELECT:
+            if (this.pDraftHand.getLength() === this.playerHand.getLength()) {
+                this.pDraftHand.addCard(card);
+                if (this.pDraftHand.getValue() > blackjack) {
+                    if (this.dDraftHand.getLength() > baseRoundDealerCards + hiddenCards) {
+                        this.dDraftHand = new Hand(this.dealerHand.getCards());
+                    } else if (this.dDraftHand.getLength() === baseRoundDealerCards + hiddenCards) {
+                        advanceState(States.CONFIRMATION);
+                    }
+                }
+                if (this.dDraftHand.getValue() >= dealerMinValue) {
+                    advanceState(States.CONFIRMATION);
+                }
+            } else if (this.dDraftHand.getValue() < dealerMinValue) {
+                this.dDraftHand.addCard(card);
+                if (this.pDraftHand.getValue() > blackjack && this.dDraftHand.getLength() > baseRoundDealerCards) {
+                    advanceState(States.CONFIRMATION);
+                } else if (this.dDraftHand.getValue() >= dealerMinValue) {
+                    advanceState(States.CONFIRMATION);
+                }
+            }
+            break;
         case States.DEALER_SELECT:
             this.dDraftHand.addCard(card);
-            if (this.playerHand.getValue() > blackJack && this.dDraftHand.getCards().length > baseRoundDealerCards) {
+            if (this.playerHand.getValue() > blackjack && this.dDraftHand.getLength() > baseRoundDealerCards) {
                 advanceState(States.CONFIRMATION);
-            } else if (this.playerHand.getValue() === blackJack && this.playerHand.getCards().length === baseRoundPlayerCards) {
+            } else if (this.playerHand.getValue() === blackjack && this.playerHand.getLength() === baseRoundPlayerCards) {
                 advanceState(States.CONFIRMATION);
             } else if (this.dDraftHand.getValue() >= dealerMinValue) {
                 advanceState(States.CONFIRMATION);
@@ -556,8 +609,12 @@ function onUnselectCard(hand, pos) {
         if (this.state === States.CONFIRMATION) {
             advanceState(this.previousState);
         }
-        if (this.state === States.DEALER_SELECT && this.dDraftHand.getValue() >= dealerMinValue) {
-            advanceState(States.CONFIRMATION);
+        if (this.dDraftHand.getValue() >= dealerMinValue) {
+            if (this.state === States.DEALER_SELECT) {
+                advanceState(States.CONFIRMATION);
+            } else if (this.state === States.DOUBLE_SELECT && this.pDraftHand.getLength() === maxPlayerDoubleDownCards) {
+                advanceState(States.CONFIRMATION);
+            }
         }
         drawGameTable();
     }
@@ -565,42 +622,63 @@ function onUnselectCard(hand, pos) {
 
 function onConfirmButtonClick() {
     switch (this.previousState) {
+        case States.FILL_GAME_PLAYER:
+            this.playerHand = new Hand(this.pDraftHand.getCards());
+            for (let i = 0; i < this.pDraftHand.getLength(); i++) {
+                this.deck.drawCard(this.pDraftHand.getCards()[i]);
+            }
+            advanceState(States.FILL_GAME_DEALER);
+            break;
+        case States.FILL_GAME_DEALER:
+            this.dealerHand = new Hand(this.dDraftHand.getCards());
+            for (let i = 0; i < this.dDraftHand.getLength(); i++) {
+                this.deck.drawCard(this.dDraftHand.getCards()[i]);
+            }
+            advanceState(States.GAME_START);
+            break;
         case States.INITIAL_SELECT:
             this.playerHand = new Hand(this.pDraftHand.getCards());
             this.dealerHand = new Hand(this.dDraftHand.getCards());
             startRound(this.playerHand.getCards(), this.dealerHand.getCards());
-            if (this.playerHand.getValue() < blackJack) {
+            if (this.playerHand.getValue() < blackjack) {
                 advanceState(States.DECISION);
-                this.usedCards = new UsedCards();
             } else {
                 advanceState(States.DEALER_SELECT);
-                this.usedCards = new UsedCards();
             }
             break;
         case States.PLAYER_SELECT:
             this.playerHand = new Hand(this.pDraftHand.getCards());
             hitOnRound();
-            if (this.playerHand.getValue () < blackJack) {
+            if (this.playerHand.getValue () < blackjack) {
                 advanceState(States.DECISION);
             } else {
                 advanceState(States.DEALER_SELECT);
             }
-            if (this.playerHand.getValue() > blackJack && this.dealerHand.getCards().length > baseRoundDealerCards) {
+            if (this.playerHand.getValue() > blackjack && this.dealerHand.getLength() > baseRoundDealerCards) {
                 advanceState(States.PLAYER_SELECT);
                 advanceState(States.GAME_START);
             }
-            this.usedCards = new UsedCards();
             break;
         case States.DEALER_SELECT:
-            for (let i = this.dealerHand.getCards().length; i < this.dDraftHand.getCards().length; i++) {
+            for (let i = this.dealerHand.getLength(); i < this.dDraftHand.getLength(); i++) {
                 this.deck.drawCard(this.dDraftHand.getCards()[i]);
             }
             this.dealerHand = new Hand(this.dDraftHand.getCards());
             this.probabilities = [new PossibleResult(), new PossibleResult(), new PossibleResult(), new PossibleResult()];
             advanceState(States.GAME_START);
-            this.usedCards = new UsedCards();
+            break;
+        case States.DOUBLE_SELECT:
+            this.deck.drawCard(this.pDraftHand.getCards()[this.pDraftHand.getLength() - 1])
+            for (let i = this.dealerHand.getLength(); i < this.dDraftHand.getLength(); i++) {
+                this.deck.drawCard(this.dDraftHand.getCards()[i]);
+            }
+            this.playerHand = new Hand(this.pDraftHand.getCards());
+            this.dealerHand = new Hand(this.dDraftHand.getCards());
+            this.probabilities = [new PossibleResult(), new PossibleResult(), new PossibleResult(), new PossibleResult()];
+            advanceState(States.GAME_START);
             break;
     }
+    this.usedCards = new UsedCards();
     drawGameTable();
 }
 
@@ -618,6 +696,16 @@ function onStandButtonClick() {
     }
     this.usedCards = new UsedCards();
     drawGameTable();
+}
+
+function onDoubleDownButtonClick() {
+    advanceState(States.DOUBLE_SELECT);
+    this.usedCards = new UsedCards();
+    drawGameTable();
+}
+
+function onCopyButtonClick(string) {
+    navigator.clipboard.writeText(string);
 }
 
 function getRemainingFromCard(card) {
@@ -643,14 +731,14 @@ function drawGameTable() {
     if (this.state === States.GAME_START) {
         gameCards.style.display = 'none';
         bigAce.style.display = 'block';
-        displayStartGameButton(centerWidth, cardSelectorHeight);
+        displayInitialButtons(centerWidth, cardSelectorHeight);
     } else {
         bigAce.style.display = 'none';
         gameCards.style.display = 'block';
         fillGameTable(tableWidth);
     }
 
-    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DOUBLE_SELECT || this.state === States.DEALER_SELECT || this.state === States.FILL_GAME_PLAYER || this.state === States.FILL_GAME_DEALER) {
         displayCardSelector(centerWidth / 11);
     }
     if (this.state === States.DECISION) {
@@ -668,11 +756,6 @@ function getCardHTMLByContainerWidth(num, width, inTable, draft, hand, pos) {
     const containerMargin = (width - containerWidth)/2;
     const containerPadding = cardWidth / 10;
     const containerHeight = (cardWidth * 1.25);
-    // const active = getRemainingFromCard(num) > 0;
-
-    let a = (1.67 * width/1.42) + width * 0.22/1.42;
-
-    // const onclick = active ? (inTable ? (draft ? `onclick="onUnselectCard(${hand}, ${pos})"` : '') : `onclick="onSelectCard(${num})"`) : (draft ? `onclick="onUnselectCard(${hand}, ${pos})"` : '');
     const onclick = inTable ? (draft ? `onclick="onUnselectCard(${hand}, ${pos})"` : '') : `onclick="onSelectCard(${num})"`;
 
     return `<div class="cardContainer ${ inTable ? (draft ? 'draft' : '') : 'inSelector' }" height="${containerHeight}px" width="${containerWidth}px" style="padding: ${containerPadding}px; margin: 0px ${containerMargin}px;" ${onclick}>
@@ -693,23 +776,33 @@ function displayCardSelector(width) {
     cardSelector.innerHTML = content;
 }
 
-function displayStartGameButton(width, height) {
+function displayInitialButtons(width, height) {
     const cardSelector = document.getElementById('cardSelector');
+    const padding = 20;
 
-    cardSelector.style.paddingLeft = `${(width - btnWidth)/2}px`;
+    // cardSelector.style.paddingLeft = `${(width - btnWidth)/2}px`;
+    cardSelector.style.paddingLeft = `${(width - (btnWidth*3 + padding*6))/2}px`;
     cardSelector.style.paddingTop = `${(height - btnHeight)/2}px`;
-    cardSelector.innerHTML = `<button type="button" class="btn btn-primary btn-lg" onclick="onNewGameButtonClick()">New Game</button>`;
+
+    let content = '';
+
+    content += `<div style="padding: 0px ${padding}px; float: left;"><button type="button" class="btn btn-primary btn-lg" onclick="onFillGameButtonClick()">Fill Game</button></div>`;
+    content += `<div style="padding: 0px ${padding}px; float: left;"><button type="button" class="btn btn-success btn-lg" onclick="onNewGameButtonClick()">New Game</button></div>`;
+    content += `<div style="padding: 0px ${padding}px; float: left;"><button type="button" class="btn btn-warning btn-lg" onclick="onModifyDeckButtonClick()">Modify Deck</button></div>`;
+
+    cardSelector.innerHTML = content;
 }
 
 function displayHitStandButtons(width, height) {
     const cardSelector = document.getElementById('cardSelector');
-    const padding = 40;
+    const padding = 20;
 
     let content = '';
-    content += `<div style="padding-right: ${padding}px; float: left;"><button type="button" class="btn btn-primary btn-lg" onclick="onHitButtonClick()">Hit</button></div>`;
-    content += `<div style="padding-left: ${padding}px; float: left;"><button type="button" class="btn btn-success btn-lg" onclick="onStandButtonClick()">Stand</button></div>`;
+    content += `<div style="padding: 0px ${padding}px; float: left;"><button type="button" class="btn btn-primary btn-lg" onclick="onHitButtonClick()">Hit</button></div>`;
+    content += `<div style="padding: 0px ${padding}px; float: left;"><button type="button" class="btn btn-success btn-lg" onclick="onStandButtonClick()">Stand</button></div>`;
+    content += `<div style="padding: 0px ${padding}px; float: left;"><button type="button" class="btn btn-secondary btn-lg" onclick="onDoubleDownButtonClick()" ${this.playerHand.getLength() > baseRoundPlayerCards ? 'disabled' : ''}>Double Down</button></div>`;
 
-    cardSelector.style.paddingLeft = `${width/2 - (btnWidth + padding)}px`;
+    cardSelector.style.paddingLeft = `${(width - (btnWidth*3 + padding*6))/2}px`;
     cardSelector.style.paddingTop = `${(height - btnHeight)/2}px`;
     cardSelector.innerHTML = content;
 }
@@ -729,7 +822,7 @@ function fillGameTable(width) {
             cards: Array.from(this.pDraftHand.getCards()),
             soft: this.pDraftHand.getSoft(),
             value: this.pDraftHand.getValue(),
-            locked: this.playerHand.getCards().length,
+            locked: this.playerHand.getLength(),
             div: document.getElementById('playerHand'),
             valueDiv: document.getElementById('playerHandValue'),
             content: ''
@@ -738,7 +831,7 @@ function fillGameTable(width) {
             cards: Array.from(this.dDraftHand.getCards()),
             soft: this.dDraftHand.getSoft(),
             value: this.dDraftHand.getValue(),
-            locked: this.dealerHand.getCards().length,
+            locked: this.dealerHand.getLength(),
             div: document.getElementById('dealerHand'),
             valueDiv: document.getElementById('dealerHandValue'),
             content: ''
@@ -746,6 +839,21 @@ function fillGameTable(width) {
     ]
 
     switch (this.state) {
+        case States.FILL_GAME_PLAYER:
+            while (hands[0].cards.length < baseRoundPlayerCards) {
+                hands[0].cards.push('empty');
+            }
+            if (this.pDraftHand.getLength() >= baseRoundPlayerCards) {
+                hands[0].cards.push('empty');
+            }
+        case States.FILL_GAME_DEALER:
+            while (hands[1].cards.length < baseRoundDealerCards + hiddenCards) {
+                hands[1].cards.push('empty');
+            }
+            if (this.dDraftHand.getLength() >= baseRoundDealerCards + hiddenCards) {
+                hands[1].cards.push('empty');
+            }
+            break;
         case States.INITIAL_SELECT:
             while (hands[0].cards.length < baseRoundPlayerCards) {
                 hands[0].cards.push('empty');
@@ -759,6 +867,10 @@ function fillGameTable(width) {
             break;
         case States.CONFIRMATION:
             switch (this.previousState) {
+                case States.FILL_GAME_PLAYER:
+                    hands[1].cards.push('empty');
+                    hands[1].cards.push('empty');
+                    break;
                 case States.INITIAL_SELECT:
                     if (hands[1].cards.length <= baseRoundDealerCards) {
                         hands[1].cards.push('hidden');
@@ -782,15 +894,23 @@ function fillGameTable(width) {
             }
             break;
         case States.PLAYER_SELECT:
-            if (this.pDraftHand.getCards().length === this.playerHand.getCards().length) {
+            if (this.pDraftHand.getLength() === this.playerHand.getLength()) {
                 hands[0].cards.push('empty');
             }
             if (hands[1].cards.length <= baseRoundDealerCards) {
                 hands[1].cards.push('hidden');
             }
             break;
+        case States.DOUBLE_SELECT:
+            if (this.pDraftHand.getLength() === this.playerHand.getLength()) {
+                hands[0].cards.push('empty');
+            }
+            if (this.dDraftHand.getValue() < dealerMinValue) {
+                hands[1].cards.push('empty');
+            }
+            break;
         case States.DEALER_SELECT:
-            if (this.dDraftHand.getValue() < 17) {
+            if (this.dDraftHand.getValue() < dealerMinValue) {
                 hands[1].cards.push('empty');
             }
             break;
@@ -819,13 +939,12 @@ function onKeyPress(key) {
         this.isKeyPressed = true;
 
         if (/^\d$/.test(key)) {
-            if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+            if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DOUBLE_SELECT || this.state === States.DEALER_SELECT || this.state === States.FILL_GAME_PLAYER || this.state === States.FILL_GAME_DEALER) {
                 if (key === '0') {
                     key = '10';
                 }
                 onSelectCard(Number(key));
             }
-            this.isKeyPressed = false;
         } else {
             switch (key) {
                 case 'n': case 'N': case 'g': case 'G':
@@ -833,30 +952,33 @@ function onKeyPress(key) {
                         onNewGameButtonClick();
                     }
                     break;
-                case 'b': case 'B':
-                    if ((((this.previousState === States.DECISION || this.previousState === States.CONFIRMATION) && (this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT)) || (this.state === States.CONFIRMATION && this.previousState !== States.INITIAL_SELECT)) && this.pDraftHand.getValue() < blackJack) {
+                case 'f': case 'F':
+                    if (this.state === States.GAME_START) {
+                        onFillGameButtonClick();
+                    }
+                    break;
+                case 'b': case 'B': case 'Escape':
+                    if (this.state === States.INITIAL_SELECT || this.state === States.FILL_GAME_PLAYER || (this.state === States.CONFIRMATION && (this.previousState === States.INITIAL_SELECT || this.previousState === States.FILL_GAME_PLAYER))) {
+                        this.pDraftHand = new Hand(this.playerHand.getCards());
+                        this.dDraftHand = new Hand(this.dealerHand.getCards());
+                        this.usedCards = new UsedCards();
+                        advanceState(States.GAME_START);
+                    } else if ((((this.previousState === States.DECISION || this.previousState === States.CONFIRMATION) && (this.state === States.PLAYER_SELECT || this.state === States.DOUBLE_SELECT || this.state === States.DEALER_SELECT)) || (this.state === States.CONFIRMATION && this.previousState !== States.INITIAL_SELECT)) && this.pDraftHand.getValue() < blackjack && this.previousState !== States.FILL_GAME_DEALER) {
                         this.pDraftHand = new Hand(this.playerHand.getCards());
                         this.dDraftHand = new Hand(this.dealerHand.getCards());
                         this.usedCards = new UsedCards();
                         advanceState(States.DECISION);
-                        console.log('back');
                     }
+                    
                     break;
                 case 'Backspace': case 'Delete':
                     switch (this.state) {
-                        case States.CONFIRMATION:
-                            advanceState(this.previousState);
-                        case States.INITIAL_SELECT: case States.PLAYER_SELECT: case States.DEALER_SELECT:
-                            let dCards = this.dDraftHand.getCards();
-                            let pCards = this.pDraftHand.getCards();    
-                            if (this.dealerHand.getCards().length < dCards.length) {
-                                this.usedCards.unuseCard(dCards.pop());
-                                this.dDraftHand = new Hand(dCards);
-                            } else if (this.playerHand.getCards().length < this.pDraftHand.getCards().length) {
-                                this.usedCards.unuseCard(pCards.pop());
-                                this.pDraftHand = new Hand(pCards);
-                            }
-                        
+                        case States.CONFIRMATION: case States.INITIAL_SELECT: case States.PLAYER_SELECT: case States.DEALER_SELECT: case States.DOUBLE_SELECT: case States.FILL_GAME_PLAYER: case States.FILL_GAME_DEALER:
+                            if (this.dealerHand.getLength() < this.dDraftHand.getLength()) {    
+                                onUnselectCard(1, this.dDraftHand.getLength() - 1);
+                            } else if (this.playerHand.getLength() < this.pDraftHand.getLength()) {
+                                onUnselectCard(0, this.pDraftHand.getLength() - 1);
+                            }                        
                         break;
                     }
                     break;
@@ -868,33 +990,76 @@ function onKeyPress(key) {
                 case 'h': case 'H':
                     if (this.state === States.DECISION) {
                         onHitButtonClick();
+                    } else if (this.state === States.CONFIRMATION && (this.previousState === States.INITIAL_SELECT || this.previousState === States.PLAYER_SELECT)) {
+                        onConfirmButtonClick();
+                        onHitButtonClick();
                     }
                     break;
                 case 's': case 'S':
                     if (this.state === States.DECISION) {
                         onStandButtonClick();
+                    }  else if (this.state === States.CONFIRMATION && (this.previousState === States.INITIAL_SELECT || this.previousState === States.PLAYER_SELECT)) {
+                        onConfirmButtonClick();
+                        onStandButtonClick();
                     }
                     break;
+                case 'd': case 'D':
+                        if (this.state === States.DECISION) {
+                            if (this.playerHand.getLength() === baseRoundPlayerCards) {
+                                onDoubleDownButtonClick();
+                            }
+                        }  else if (this.state === States.CONFIRMATION && this.previousState === States.INITIAL_SELECT) {
+                            onConfirmButtonClick();
+                            onDoubleDownButtonClick();
+                        }
+                    break;
                 case 'Enter':
-                    if (this.state === States.CONFIRMATION) {
-                        onConfirmButtonClick();
-                    } else if (this.state === States.GAME_START) {
-                        onNewGameButtonClick();
+                    switch (this.state) {
+                        case States.GAME_START:
+                            onNewGameButtonClick();
+                            break;
+                        case States.FILL_GAME_PLAYER:
+                            if (this.pDraftHand.getLength() >= baseRoundPlayerCards) {
+                                advanceState(States.CONFIRMATION);
+                            }
+                            break;
+                        case States.CONFIRMATION:
+                            onConfirmButtonClick();
+                            break;
                     }
                     break;
                 case 'j': case 'J': case 'q': case 'Q': case 'k': case 'K':
-                    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+                    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DOUBLE_SELECT || this.state === States.DEALER_SELECT || this.state === States.FILL_GAME_PLAYER || this.state === States.FILL_GAME_DEALER) {
                         onSelectCard(10);
                     }
                     break;
                 case 'a': case 'A':
-                    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DEALER_SELECT) {
+                    if (this.state === States.INITIAL_SELECT || this.state === States.PLAYER_SELECT || this.state === States.DOUBLE_SELECT || this.state === States.DEALER_SELECT || this.state === States.FILL_GAME_PLAYER || this.state === States.FILL_GAME_DEALER) {
                         onSelectCard(1);
                     }
                     break;
+                case 'm': case 'M':
+                    if (this.state === States.GAME_START) {
+                        onModifyDeckButtonClick();
+                    }
+                    break;
             }
-            drawGameTable();
-            this.isKeyPressed = false;
         }
+        drawGameTable();
+        this.isKeyPressed = false;
     }
+}
+
+function forTesting() {
+    this.deck.cards[1] = 1;
+    this.deck.cards[2] = 1;
+    this.deck.cards[3] = 0;
+    this.deck.cards[4] = 0;
+    this.deck.cards[5] = 1;
+    this.deck.cards[6] = 0;
+    this.deck.cards[7] = 0;
+    this.deck.cards[8] = 0;
+    this.deck.cards[9] = 1;
+    this.deck.cards[10] = 0;
+    this.deck.tCards = 4;
 }
