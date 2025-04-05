@@ -541,7 +541,7 @@ function onSelectCard(card) {
             break;
         case States.FILL_GAME_DEALER:
             this.dDraftHand.addCard(card);
-            if ((this.pDraftHand.getValue() >= blackjack && this.dDraftHand.getLength() === (baseRoundDealerCards + hiddenCards)) || this.dDraftHand.getValue() >= dealerMinValue) {
+            if ((this.playerHand.getValue() > blackjack && this.dDraftHand.getLength() === (baseRoundDealerCards + hiddenCards)) || this.dDraftHand.getValue() >= dealerMinValue || ((this.playerHand.getValue() === blackjack && this.playerHand.getLength() === baseRoundPlayerCards && this.dDraftHand.getLength() === (baseRoundDealerCards + hiddenCards)))) {
                 advanceState(States.CONFIRMATION);
             }
             break;
