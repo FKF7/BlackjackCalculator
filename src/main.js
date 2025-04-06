@@ -664,13 +664,20 @@ function onConfirmButtonClick() {
             hitOnRound();
             if (this.playerHand.getValue () < blackjack) {
                 advanceState(States.DECISION);
+            } else if (this.playerHand.getValue () === blackjack) {
+                if (this.dealerHand.getValue() < dealerMinValue) {
+                    advanceState(States.DEALER_SELECT);
+                } else {
+                    advanceState(States.GAME_START);
+                }
             } else {
-                advanceState(States.DEALER_SELECT);
+                if (this.dealerHand.getLength() > baseRoundDealerCards) {
+                    advanceState(States.GAME_START);
+                } else {
+                    advanceState(States.DEALER_SELECT);
+                }
             }
-            if (this.playerHand.getValue() > blackjack && this.dealerHand.getLength() > baseRoundDealerCards) {
-                advanceState(States.PLAYER_SELECT);
-                advanceState(States.GAME_START);
-            }
+            
             break;
         case States.DEALER_SELECT:
             for (let i = this.dealerHand.getLength(); i < this.dDraftHand.getLength(); i++) {
@@ -1065,15 +1072,15 @@ function onKeyPress(key) {
 }
 
 function forTesting() {
-    this.deck.cards[1] = 1;
+    this.deck.cards[1] = 2;
     this.deck.cards[2] = 1;
     this.deck.cards[3] = 0;
     this.deck.cards[4] = 0;
-    this.deck.cards[5] = 1;
-    this.deck.cards[6] = 0;
-    this.deck.cards[7] = 0;
+    this.deck.cards[5] = 0;
+    this.deck.cards[6] = 1;
+    this.deck.cards[7] = 1;
     this.deck.cards[8] = 0;
     this.deck.cards[9] = 1;
     this.deck.cards[10] = 0;
-    this.deck.tCards = 4;
+    this.deck.tCards = 6;
 }
