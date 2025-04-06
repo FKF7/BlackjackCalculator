@@ -506,10 +506,6 @@ function drawStatsTables() {
 
 function adjustCopyButtonsSize(centerHeight) {
     const tableHight = document.getElementById('simulationsTableContainer').offsetHeight + 40;
-    
-    console.log(tableHight);
-    console.log(centerHeight);
-
     const containerHeight = centerHeight - tableHight;
     const copyButtonContainers = document.getElementsByClassName('copyButtonContainer');
     const copyButtons = document.getElementsByClassName('copyButton');
