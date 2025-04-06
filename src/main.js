@@ -504,6 +504,23 @@ function drawStatsTables() {
     ramainingTable.innerHTML = tableContent;
 }
 
+function adjustCopyButtonsSize(centerHeight) {
+    const tableHight = document.getElementById('simulationsTableContainer').offsetHeight + 40;
+    
+    console.log(tableHight);
+    console.log(centerHeight);
+
+    const containerHeight = centerHeight - tableHight;
+    const copyButtonContainers = document.getElementsByClassName('copyButtonContainer');
+    const copyButtons = document.getElementsByClassName('copyButton');
+
+    
+    for (let i = 0; i < copyButtons.length; i++) {
+        copyButtonContainers[i].style.padding = `${containerHeight / 30}px 0px`;
+        copyButtons[i].style.height = `${containerHeight * 4/15}px`;
+    }
+}
+
 function drawCard(card) {
     this.deck.drawCard(card);
 }
@@ -748,6 +765,7 @@ function drawGameTable() {
         displayConfirmButton(centerWidth, cardSelectorHeight);
     }
     drawStatsTables();
+    adjustCopyButtonsSize(centerHeight);
 }
 
 function getCardHTMLByContainerWidth(num, width, inTable, draft, hand, pos) {

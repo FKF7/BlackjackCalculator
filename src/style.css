@@ -154,11 +154,6 @@ section {
     min-height: 75vh;
 }
 
-#tablesContainer {
-    padding-left: 5%;
-    padding-right: 5%;
-}
-
 .simulationsTableColumnHeader {
     text-align: center;
 }
@@ -190,13 +185,7 @@ section {
     margin-top: 20px;
 }
 
-.copyButtonContainer {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 .copyButton {
-    width: 50px;
     vertical-align: middle;
 }
 
