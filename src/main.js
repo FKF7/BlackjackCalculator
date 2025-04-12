@@ -1,6 +1,6 @@
-const deckNumber = 3;
+const deckCount = 3;
 const cardsInDeck = 52;
-const totalCards = deckNumber * cardsInDeck;
+const totalCards = deckCount * cardsInDeck;
 const baseRoundPlayerCards = 2;
 const baseRoundDealerCards = 1;
 const baseRoundCards = baseRoundPlayerCards + baseRoundDealerCards;
@@ -40,16 +40,16 @@ const Cards = Object.freeze({
     TEN: 10
 });
 const Amounts = Object.freeze({
-    ACE: 12,
-    TWO: 12,
-    THREE: 12,
-    FOUR: 12,
-    FIVE: 12,
-    SIX: 12,
-    SEVEN: 12,
-    EIGHT: 12,
-    NINE: 12,
-    TEN: 48
+    ACE: 4 * deckCount,
+    TWO: 4 * deckCount,
+    THREE: 4 * deckCount,
+    FOUR: 4 * deckCount,
+    FIVE: 4 * deckCount,
+    SIX: 4 * deckCount,
+    SEVEN: 4 * deckCount,
+    EIGHT: 4 * deckCount,
+    NINE: 4 * deckCount,
+    TEN: 16 * deckCount
 });
 const Hands = Object.freeze({
     PLAYER: 0,
@@ -271,7 +271,6 @@ function drawCards() {
             usedCards[i] = uCards;
         }
     }
-    
 
     let i = [1, 1, 1, 1];
     while (i[0] <= Cards.TEN) { // misteryCard - playerDraw0
