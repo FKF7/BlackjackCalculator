@@ -187,8 +187,8 @@ function onInit() {
 
 function startRound(pCards, dCard) {
     this.deck.drawCard(pCards[0]);
-    this.deck.drawCard(dCard);
     this.deck.drawCard(pCards[1]);
+    this.deck.drawCard(dCard);
     if (this.deck.getTCards() === 1) {
         let i = Cards.ACE;
         while (this.deck.getCard(i) === 0) {
