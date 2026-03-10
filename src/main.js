@@ -12,6 +12,9 @@ const maxDraws = hiddenCards + maxDrawsByPlayer + maxDrawsByDealer;
 const dealerMinValue = 17;
 const blackjack = 21;
 
+const normalEdge = 0.45
+const tCountCoef = 0.5
+
 const btnHeight = 48;
 const btnWidth = 144;
 
@@ -51,6 +54,18 @@ const Amounts = Object.freeze({
     NINE: 4 * deckCount,
     TEN: 16 * deckCount
 });
+const Weights = Object.freeze({
+    ACE: -1,
+    TWO: 0.5,
+    THREE: 1,
+    FOUR: 1,
+    FIVE: 1.5,
+    SIX: 1,
+    SEVEN: 0.5,
+    EIGHT: 0,
+    NINE: -0.5,
+    TEN: -1
+});
 const Hands = Object.freeze({
     PLAYER: 0,
     DEALER: 1
@@ -62,6 +77,7 @@ class Deck {
     }
     reset() {
         this.cards = {};
+        this.count = 0;
         this.tCards = totalCards;
         for (let i = Cards.ACE; i <= Cards.TEN; i++) {
             this.cards[i] = Amounts[Object.keys(Cards)[i-1]];
@@ -73,13 +89,30 @@ class Deck {
     getTCards() {
         return this.tCards;
     }
+    getCount() {
+        return this.count;
+    }
+    getTrueCount() {
+        return this.count / (this.tCards / cardsInDeck);
+    }
+    getRoughEdge() {
+        return tCountCoef * this.getTrueCount() - normalEdge;
+    }
     drawCard(card) {
         if (this.cards[card] > 0) {
             this.cards[card]--;
             this.tCards--;
+            this.count += Weights[Object.keys(Cards)[card-1]];
         }
         if (this.tCards === 0) {
             this.reset()
+        }
+    }
+    returnCard(card) {
+        if (this.cards[card] < Amounts[Object.keys(Cards)[card-1]]) {
+            this.cards[card]++;
+            this.tCards++;
+            this.count -= Weights[Object.keys(Cards)[card-1]];
         }
     }
 }
@@ -177,7 +210,8 @@ function onInit() {
     this.playerHand = new Hand([]);
     this.dealerHand = new Hand([]);
     this.usedCards = new UsedCards();
-    // forTesting();
+    this.showCount = true;
+    forTesting();
     window.addEventListener('resize', () => {drawGameTable()});
     drawGameTable();
     document.addEventListener('keydown', function(event) {
@@ -239,7 +273,7 @@ function endRound(dCards) {
     this.dealerHiddenCard = 0;
 }
 
-function validadeDealer1Draw(card, draw) {
+function validateDealer1Draw(card, draw) {
     let ishiddenCardHidden = (this.dealerHiddenCard === 0 || this.dealerHiddenCard === draw);
     let isDrawValid = (card + draw !== 11) || (card !== Cards.ACE && draw !== Cards.ACE);
 
@@ -275,7 +309,7 @@ function drawCards() {
     let i = [1, 1, 1, 1];
     while (i[0] <= Cards.TEN) { // misteryCard - playerDraw0
         if (decks[0].getCard(i[0]) - usedCards[0].getUsed(i[0])) {
-            if (validadeDealer1Draw(this.dealerHand.getCards()[0], i[0])) {
+            if (validateDealer1Draw(this.dealerHand.getCards()[0], i[0])) {
                 dHand = new Hand(this.dealerHand.getCards());
                 if (this.dealerHiddenCard === 0) {
                     dHand.addCard(i[0]);
@@ -459,8 +493,9 @@ function formatPercentage(probability) {
 
 function drawStatsTables() {
     let probabilities = new Array(4);
+    const remainingTable = document.getElementById('remainingTableBody');
     const simulationsTable = document.getElementById('simulationsTableBody');
-    const ramainingTable = document.getElementById('remainingTableBody');
+    
     for (let i = 0; i <= 2; i++) {
         probabilities[i] = new Array(9);
         probabilities[i][0] = formatPercentage(this.probabilities[i].getDealerBusts());
@@ -485,8 +520,6 @@ function drawStatsTables() {
         tableContent += '</tr>';
     }
 
-
-
     simulationsTable.innerHTML = tableContent;
     tableContent = '';
 
@@ -494,30 +527,27 @@ function drawStatsTables() {
         let remaining = getRemainingFromCard(i);
         let totalRemaining = formatPercentage(remaining / (this.deck.getTCards() - this.usedCards.getTUsed()));
         tableContent += `<tr>
-                            <td class="remainingTableFRow">${i}</td><td class="remainingTableCRow">${remaining}</td><td class="remainingTableCRow">${totalRemaining}</td>
+                            <td class="remainingTableFRow">${i}</td><td class="remainingTableCRow">
+                                <input class="operationButton" type="image" src="../img/minusIcon.png" alt="Botão" width="16" height="16" onclick="onMinusButtonClick(${i})">
+                                <span class="remainingText">${remaining}</span>
+                                <input class="operationButton" type="image" src="../img/plusIcon.png" alt="Botão" width="16" height="16" onclick="onPlusButtonClick(${i})">
+                            </td><td class="remainingTableCRow">${totalRemaining}</td>
                         </tr>`
     }
     tableContent += `<tr>
                         <td class="remainingTableFRow">T</td><td class="remainingTableCRow">${this.deck.getTCards() - this.usedCards.getTUsed()}</td><td class="remainingTableCRow">-</td>
                     </tr>`
-    ramainingTable.innerHTML = tableContent;
+    remainingTable.innerHTML = tableContent;
 }
 
-function adjustCopyButtonsSize(centerHeight) {
-    const tableHight = document.getElementById('simulationsTableContainer').offsetHeight + 40;
-    const containerHeight = centerHeight - tableHight;
-    const copyButtonContainers = document.getElementsByClassName('copyButtonContainer');
-    const copyButtons = document.getElementsByClassName('copyButton');
-
-    
-    for (let i = 0; i < copyButtons.length; i++) {
-        copyButtonContainers[i].style.padding = `${containerHeight / 30}px 0px`;
-        copyButtons[i].style.height = `${containerHeight * 4/15}px`;
-    }
-}
-
-function drawCard(card) {
+function onMinusButtonClick(card) {
     this.deck.drawCard(card);
+    drawGameTable();
+}
+
+function onPlusButtonClick(card) {
+    this.deck.returnCard(card);
+    drawGameTable();
 }
 
 function onFillGameButtonClick() {
@@ -539,8 +569,6 @@ function onNewGameButtonClick() {
     this.dealerHiddenCard = 0;
     drawGameTable();
 }
-
-function onModifyDeckButtonClick() {}
 
 function onSelectCard(card) {
     this.usedCards.useCard(card);
@@ -767,7 +795,61 @@ function drawGameTable() {
         displayConfirmButton(centerWidth, cardSelectorHeight);
     }
     drawStatsTables();
-    adjustCopyButtonsSize(centerHeight);
+    drawCountOrCopy(centerHeight)
+}
+
+function toggleCountOrCopy() {
+    this.showCount = !this.showCount;
+    drawGameTable();
+}
+
+function drawCountOrCopy(centerHeight) {
+    const tableHight = document.getElementById('simulationsTableContainer').offsetHeight + 40;
+    const countingInfo = document.getElementById('countingInfo');
+    const copyButtonsContainer = document.getElementById('copyButtonsContainer');
+    
+    const containerHeight = centerHeight - tableHight;
+    console.log()
+    let content = '';
+
+    if (this.showCount) {
+        copyButtonsContainer.style.display = 'none';
+
+        content =  `<label>R Count:</label>
+                    ${this.deck.getCount()}
+					<br>
+					<label>T Count:</label>
+                    ${this.deck.getTrueCount().toFixed(2)}
+					<br>
+					<label>P Edge:</label>
+                    ${(this.deck.getRoughEdge()).toFixed(2)}%
+					<br>`;
+        
+        countingInfo.innerHTML = content;
+
+
+        countingInfo.style.display = 'block';
+    } else {
+        const texts = ['/blackjack bet:all ', '/deposit ', '!dep all'];
+
+        countingInfo.style.display = 'none';
+        for (let i = 0; i < texts.length; i++) {
+            content += `<div class="copyButtonContainer">
+							<input type="image" class="copyButton" src="../img/copyButton.png" onclick="onCopyButtonClick('${texts[i]}')"/>
+							<label>${texts[i]}</label>
+						</div>`
+        }
+        copyButtonsContainer.innerHTML = content;
+
+        const copyButtonContainers = document.getElementsByClassName('copyButtonContainer');
+        const copyButtons = document.getElementsByClassName('copyButton');
+
+        for (let i = 0; i < copyButtons.length; i++) {
+            copyButtonContainers[i].style.padding = `${containerHeight / 30}px 0px`;
+            copyButtons[i].style.height = `${containerHeight * 4/15}px`;
+        }
+        copyButtonsContainer.style.display = 'block';
+    }
 }
 
 function getCardHTMLByContainerWidth(num, width, inTable, draft, hand, pos) {
@@ -800,7 +882,6 @@ function displayInitialButtons(width, height) {
     const cardSelector = document.getElementById('cardSelector');
     const padding = 20;
 
-    // cardSelector.style.paddingLeft = `${(width - btnWidth)/2}px`;
     cardSelector.style.paddingLeft = `${(width - (btnWidth*3 + padding*6))/2}px`;
     cardSelector.style.paddingTop = `${(height - btnHeight)/2}px`;
 
@@ -1063,6 +1144,8 @@ function onKeyPress(key) {
                         onModifyDeckButtonClick();
                     }
                     break;
+                case 't': case 'T':
+                    toggleCountOrCopy();
             }
         }
         drawGameTable();
@@ -1071,15 +1154,15 @@ function onKeyPress(key) {
 }
 
 function forTesting() {
-    this.deck.cards[1] = 2;
-    this.deck.cards[2] = 1;
-    this.deck.cards[3] = 0;
-    this.deck.cards[4] = 0;
-    this.deck.cards[5] = 0;
-    this.deck.cards[6] = 1;
-    this.deck.cards[7] = 1;
-    this.deck.cards[8] = 0;
-    this.deck.cards[9] = 1;
-    this.deck.cards[10] = 0;
-    this.deck.tCards = 6;
+    // this.deck.cards[1] = 2;
+    // this.deck.cards[2] = 0;
+    // this.deck.cards[3] = 0;
+    // this.deck.cards[4] = 0;
+    // this.deck.cards[5] = 0;
+    // this.deck.cards[6] = 0;
+    // this.deck.cards[7] = 0;
+    // this.deck.cards[8] = 0;
+    // this.deck.cards[9] = 0;
+    // this.deck.cards[10] = 1;
+    // this.deck.tCards = 3;
 }

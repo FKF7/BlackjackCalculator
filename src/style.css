@@ -189,6 +189,11 @@ section {
     vertical-align: middle;
 }
 
+#countingInfo {
+    margin-left: 20%;
+    margin-top: 20px;
+}
+
 footer {
 	height: 10vh;
 	width: 100%;
@@ -200,6 +205,14 @@ footer {
     padding-top: 2vh;
     padding-bottom: 2vh;
 	text-align: center;
+    vertical-align: middle;
+}
+
+.remainingText {
+    vertical-align: middle;
+}
+
+.operationButton {
     vertical-align: middle;
 }
 
